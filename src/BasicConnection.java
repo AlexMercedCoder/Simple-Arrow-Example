@@ -19,41 +19,39 @@ public class BasicConnection extends FlightSqlClientDemoApp{
         super(bufferAllocator);
       }
 
-    // method for create FlightSQL Client
-    public FlightSqlClient getClient(){
-        // Database Settings
-        String host = "localhost";
-        int port = 32010;
-        String user = "username";
-        String pass = "password123";
-
-        // Auth Middleware
-        final ClientIncomingAuthHeaderMiddleware.Factory factory = new ClientIncomingAuthHeaderMiddleware.Factory(new ClientBearerHeaderHandler());
-
-        // Create Flight Client
-        // Where we are connecting to and how
-        final FlightClient client = FlightClient.builder().allocator(this.allocator).location(Location.forGrpcInsecure(host, port)).intercept(factory).build();
-
-        //Client Handshake
-        // Passing auth details to authenticate
+      public FlightSqlClient createFlightSqlClient(final String host, final String port, final String user, final String pass) {
+        final ClientIncomingAuthHeaderMiddleware.Factory factory =
+            new ClientIncomingAuthHeaderMiddleware.Factory(new ClientBearerHeaderHandler());
+        final FlightClient client = FlightClient.builder()
+            .allocator(allocator)
+            .location(Location.forGrpcInsecure(host, Integer.parseInt(port)))
+            .intercept(factory)
+            .build();
         client.handshake(new CredentialCallOption(new BasicAuthCredentialWriter(user, pass)));
-
-        // Create FlightSQL Client
-        var flightSqlClient = new FlightSqlClient(client);
-
+        // add credential to options
+        callOptions.add(factory.getCredentialCallOption());
+        flightSqlClient = new FlightSqlClient(client);
         return flightSqlClient;
-    }
+      }
+
+
 
     public static void main(final String[] args) throws Exception {
+
+
+        String host = "localhost";
+        String port = "32010";
+        String user = "username";
+        String pass = "password123";
 
         //Create Instance of class
         var app = new BasicConnection(new RootAllocator(Integer.MAX_VALUE));
         
         // get client
-        var client = app.getClient();
+        var client = app.createFlightSqlClient(host, port, user, pass);
 
         // Prepare an SQL Statement
-        var query = client.prepare("SELECT * FROM '@alexmerced'.zips");
+        var query = client.prepare("SELECT * FROM \"@username\".zips", app.getCallOptions());
 
         // execute query
         var results = query.execute();
