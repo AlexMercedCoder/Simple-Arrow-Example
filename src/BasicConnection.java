@@ -57,7 +57,7 @@ public class BasicConnection extends FlightSqlClientDemoApp{
         var results = query.execute();
 
         // get the schema of the results
-        results.getSchema();
+        System.out.println(results.getSchema().toString());
         
     }
 }
