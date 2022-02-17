@@ -1,6 +1,5 @@
 
 
-import org.apache.arrow.flight.CallOption;
 import org.apache.arrow.flight.FlightClient;
 import org.apache.arrow.flight.Location;
 import org.apache.arrow.flight.auth2.BasicAuthCredentialWriter;
